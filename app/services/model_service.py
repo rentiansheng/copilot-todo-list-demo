@@ -81,12 +81,15 @@ class ModelService:
                 "page_size": list_data.page_size
             }
         except Exception as e:
+            # Log the error but return generic message
+            import logging
+            logging.error(f"Error listing objects: {e}")
             return {
                 "items": [],
                 "total": 0,
                 "page": list_data.page,
                 "page_size": list_data.page_size,
-                "error": str(e)
+                "error": "Failed to retrieve data"
             }
 
 model_service = ModelService()

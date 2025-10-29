@@ -35,7 +35,7 @@ class TreeService:
             )
             max_id = result['aggregations']['max_id']['value']
             return int(max_id) + 1 if max_id else 1
-        except:
+        except Exception:
             return 1
     
     def create(self, node_data: TreeNodeCreate) -> Dict[str, Any]:
@@ -248,12 +248,15 @@ class TreeService:
                 "page_size": list_data.page_size
             }
         except Exception as e:
+            # Log the error but return generic message
+            import logging
+            logging.error(f"Error listing children for {tree_id}: {e}")
             return {
                 "items": [],
                 "total": 0,
                 "page": list_data.page,
                 "page_size": list_data.page_size,
-                "error": str(e)
+                "error": "Failed to retrieve data"
             }
 
 tree_service = TreeService()
