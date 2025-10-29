@@ -231,22 +231,80 @@ Body:
 ### Project Structure
 ```
 .
-├── main.py                 # Application entry point
+├── main.py                      # Application entry point
 ├── app/
 │   ├── __init__.py
-│   ├── config.py          # Configuration
-│   ├── api/               # API routes
-│   │   ├── tree.py        # Tree operations
-│   │   └── model.py       # Model operations
-│   ├── models/            # Data models
-│   │   └── schemas.py     # Pydantic schemas
-│   └── services/          # Business logic
-│       ├── elasticsearch.py    # ES client
-│       ├── tree_service.py     # Tree operations
-│       └── model_service.py    # Model operations
-├── requirements.txt       # Dependencies
-└── readme.md             # Documentation
+│   ├── config.py               # Configuration
+│   ├── api/                    # API routes
+│   │   ├── tree.py            # Tree operations
+│   │   └── model.py           # Model operations
+│   ├── models/                 # Data models
+│   │   └── schemas.py         # Pydantic schemas
+│   └── services/               # Business logic
+│       ├── elasticsearch.py   # ES client
+│       ├── query_builder.py   # ES query builders
+│       ├── tree_service.py    # Tree operations
+│       └── model_service.py   # Model operations
+├── tests/                      # Unit tests
+│   ├── api/                   # API tests
+│   ├── models/                # Model tests
+│   └── services/              # Service tests
+├── requirements.txt            # Dependencies
+├── pyproject.toml             # Project configuration
+├── .flake8                    # Linting configuration
+├── README.md                  # Main documentation
+├── TESTING.md                 # Testing guide
+├── EXAMPLES.md                # API examples
+└── QUERY_BUILDER.md           # Query builder docs
 ```
+
+## Testing
+
+The project includes comprehensive unit tests with **64% code coverage**.
+
+### Run Tests
+```bash
+# Install test dependencies
+pip install -r requirements.txt
+
+# Run all tests
+pytest tests/
+
+# Run with coverage report
+pytest tests/ --cov=app --cov-report=html
+
+# Run specific test file
+pytest tests/api/test_tree.py
+```
+
+### Test Coverage
+- **Query Builder**: 100%
+- **Models/Schemas**: 100%
+- **Config**: 100%
+- **API Endpoints**: 77-89%
+- **Services**: 17-40% (mocked in integration tests)
+
+See [TESTING.md](TESTING.md) for detailed testing documentation.
+
+## Code Quality
+
+### Code Formatting
+The project uses Black and isort for consistent code formatting:
+```bash
+# Format code
+black app/ tests/ main.py
+isort app/ tests/ main.py
+
+# Check formatting
+black --check app/ tests/ main.py
+flake8 app/ tests/ main.py
+```
+
+### Quality Standards
+- **Black**: Code formatting (line length: 88)
+- **isort**: Import sorting
+- **Flake8**: Linting and style checking
+- **Pytest**: Unit testing with coverage
 
 ## License
 

@@ -1,17 +1,23 @@
-from fastapi import APIRouter, HTTPException, Path, Body
+from fastapi import APIRouter, Body, HTTPException, Path
+
 from app.models.schemas import (
-    TreeCreateRequest, TreeUpdateRequest, TreeMoveRequest, 
-    TreeCopyRequest, TreeListRequest, ServiceBindRequest, 
-    ServiceUnbindRequest
+    ServiceBindRequest,
+    ServiceUnbindRequest,
+    TreeCopyRequest,
+    TreeCreateRequest,
+    TreeListRequest,
+    TreeMoveRequest,
+    TreeUpdateRequest,
 )
 from app.services.tree_service import tree_service
 
 router = APIRouter()
 
+
 @router.post("/{tree_type}")
 async def create_tree(
     tree_type: str = Path(..., description="Type of tree"),
-    request: TreeCreateRequest = Body(...)
+    request: TreeCreateRequest = Body(...),
 ):
     """Create a new tree node"""
     try:
@@ -20,10 +26,11 @@ async def create_tree(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.put("/{tree_type}")
 async def update_tree(
     tree_type: str = Path(..., description="Type of tree"),
-    request: TreeUpdateRequest = Body(...)
+    request: TreeUpdateRequest = Body(...),
 ):
     """Update an existing tree node"""
     try:
@@ -32,11 +39,12 @@ async def update_tree(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.delete("/{tree_type}")
 async def delete_tree(
     tree_type: str = Path(..., description="Type of tree"),
     bk_obj_id: str = Body(...),
-    bk_inst_id: int = Body(...)
+    bk_inst_id: int = Body(...),
 ):
     """Delete a tree node (soft delete by setting cw_status to 20)"""
     try:
@@ -45,10 +53,11 @@ async def delete_tree(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.post("/{tree_type}/move")
 async def move_tree(
     tree_type: str = Path(..., description="Type of tree"),
-    request: TreeMoveRequest = Body(...)
+    request: TreeMoveRequest = Body(...),
 ):
     """Move a tree node to a new parent"""
     try:
@@ -57,10 +66,11 @@ async def move_tree(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.post("/{tree_type}/copy")
 async def copy_tree(
     tree_type: str = Path(..., description="Type of tree"),
-    request: TreeCopyRequest = Body(...)
+    request: TreeCopyRequest = Body(...),
 ):
     """Copy a tree node to a new location"""
     try:
@@ -69,22 +79,28 @@ async def copy_tree(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+
 @router.post("/{tree_id}/{parent_obj_id}/{parent_inst_id}/list")
 async def list_trees(
     tree_id: str = Path(..., description="Tree ID / bk_obj_id"),
     parent_obj_id: str = Path(..., description="Parent object ID"),
     parent_inst_id: int = Path(..., description="Parent instance ID"),
-    request: TreeListRequest = Body(...)
+    request: TreeListRequest = Body(...),
 ):
     """List tree nodes under a specific parent"""
     try:
         result = tree_service.list_tree_nodes(
-            tree_id, parent_obj_id, parent_inst_id,
-            request.page, request.page_size, request.filters
+            tree_id,
+            parent_obj_id,
+            parent_inst_id,
+            request.page,
+            request.page_size,
+            request.filters,
         )
         return {"code": 0, "data": result, "message": "success"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post("/service/inst/bind")
 async def bind_service_instance(request: ServiceBindRequest = Body(...)):
@@ -96,6 +112,7 @@ async def bind_service_instance(request: ServiceBindRequest = Body(...)):
         return {"code": 0, "data": result, "message": "success"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.post("/service/inst/unbind")
 async def unbind_service_instance(request: ServiceUnbindRequest = Body(...)):
