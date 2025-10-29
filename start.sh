@@ -21,7 +21,7 @@ if ! python3 -c "import fastapi" 2>/dev/null; then
 fi
 
 # Start the server
-echo "Starting server on http://0.0.0.0:8000"
+echo "Starting server on http://localhost:8000 (binding to all interfaces 0.0.0.0:8000)"
 echo "API docs available at http://localhost:8000/docs"
 echo ""
 
