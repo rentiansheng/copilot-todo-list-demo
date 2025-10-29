@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: cmdb-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    networks:
+      - cmdb-network
+
+  api:
+    build: .
+    container_name: cmdb-api
+    environment:
+      - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - ELASTICSEARCH_USER=elastic
+      - ELASTICSEARCH_PASSWORD=changeme
+    ports:
+      - "8000:8000"
+    depends_on:
+      - elasticsearch
+    networks:
+      - cmdb-network
+    volumes:
+      - .:/app
+
+volumes:
+  es_data:
+    driver: local
+
+networks:
+  cmdb-network:
+    driver: bridge
