@@ -1,4 +1,5 @@
 from app.services.elasticsearch import es_service
+from app.services.query_builder import TreeQueryBuilder
 from app.models.schemas import (
     TreeNode, TreeCreateRequest, TreeUpdateRequest, 
     TreeMoveRequest, TreeCopyRequest, Relation
@@ -119,34 +120,12 @@ class TreeService:
                        parent_inst_id: int, page: int = 1, 
                        page_size: int = 20, filters: Optional[Dict] = None) -> Dict:
         """List tree nodes under a specific parent"""
-        # Build query to find children of the parent
-        query = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {
-                            "nested": {
-                                "path": "cw__relation",
-                                "query": {
-                                    "bool": {
-                                        "must": [
-                                            {"term": {"cw__relation.type": 2}},
-                                            {"term": {"cw__relation.bk_asst_obj_id": parent_obj_id}},
-                                            {"term": {"cw__relation.bk_asst_inst_id": str(parent_inst_id)}}
-                                        ]
-                                    }
-                                }
-                            }
-                        }
-                    ]
-                }
-            }
-        }
+        # Build query using the query builder
+        query = TreeQueryBuilder.find_children_by_parent(parent_obj_id, parent_inst_id)
         
         # Add additional filters if provided
         if filters:
-            for key, value in filters.items():
-                query["query"]["bool"]["must"].append({"term": {key: value}})
+            query = TreeQueryBuilder.add_filters_to_query(query, filters)
         
         result = es_service.search_documents(tree_id, query, page, page_size)
         

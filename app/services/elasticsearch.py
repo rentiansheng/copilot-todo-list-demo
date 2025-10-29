@@ -1,5 +1,6 @@
 from elasticsearch import Elasticsearch
 from app.config import config
+from app.services.query_builder import IndexMappingBuilder, TreeQueryBuilder
 from typing import Optional, List, Dict, Any
 
 class ElasticsearchService:
@@ -18,29 +19,7 @@ class ElasticsearchService:
         index_name = self.get_index_name(bk_obj_id)
         
         if not self.client.indices.exists(index=index_name):
-            mapping = {
-                "mappings": {
-                    "properties": {
-                        "bk_inst_id": {"type": "integer"},
-                        "bk_inst_name": {"type": "keyword"},
-                        "cw_status": {"type": "integer"},
-                        "cw__relation": {
-                            "type": "nested",
-                            "properties": {
-                                "type": {"type": "integer"},
-                                "inst_asst": {
-                                    "properties": {
-                                        "bk_obj_asst_id": {"type": "keyword"},
-                                        "bk_asst_id": {"type": "keyword"}
-                                    }
-                                },
-                                "bk_asst_obj_id": {"type": "keyword"},
-                                "bk_asst_inst_id": {"type": "keyword"}
-                            }
-                        }
-                    }
-                }
-            }
+            mapping = IndexMappingBuilder.build_tree_node_mapping()
             self.client.indices.create(index=index_name, body=mapping)
     
     def index_document(self, bk_obj_id: str, doc_id: int, document: Dict[str, Any]) -> Dict:
@@ -89,13 +68,8 @@ class ElasticsearchService:
         """Get next available ID for a new document"""
         index_name = self.get_index_name(bk_obj_id)
         try:
-            result = self.client.search(
-                index=index_name,
-                body={
-                    "size": 1,
-                    "sort": [{"bk_inst_id": {"order": "desc"}}]
-                }
-            )
+            query = TreeQueryBuilder.get_latest_id()
+            result = self.client.search(index=index_name, body=query)
             if result['hits']['hits']:
                 return result['hits']['hits'][0]['_source']['bk_inst_id'] + 1
             return 1

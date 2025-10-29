@@ -1,4 +1,5 @@
 from app.services.elasticsearch import es_service
+from app.services.query_builder import IndexMappingBuilder, ESQueryBuilder
 from app.models.schemas import TreeObjectCreateRequest
 from typing import Dict, List
 
@@ -11,15 +12,7 @@ class ModelService:
         """Create a tree object model"""
         # Ensure the model index exists
         if not es_service.client.indices.exists(index=self.model_index):
-            mapping = {
-                "mappings": {
-                    "properties": {
-                        "bk_obj_id": {"type": "keyword"},
-                        "bk_obj_name": {"type": "keyword"},
-                        "properties": {"type": "object"}
-                    }
-                }
-            }
+            mapping = IndexMappingBuilder.build_object_model_mapping()
             es_service.client.indices.create(index=self.model_index, body=mapping)
         
         # Create the object model document
@@ -38,9 +31,10 @@ class ModelService:
         from_index = (page - 1) * page_size
         
         try:
+            query = ESQueryBuilder.match_all()
             result = es_service.client.search(
                 index=self.model_index,
-                body={"query": {"match_all": {}}},
+                body=query,
                 from_=from_index,
                 size=page_size
             )
